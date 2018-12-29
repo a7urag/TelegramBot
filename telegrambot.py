@@ -7,7 +7,7 @@ import telepot
 import datetime
 from subprocess import PIPE, Popen
 
-DOWNLOADS_PATH = '~/Downloads'
+DOWNLOADS_PATH = '/home/users/pi/Downloads'
 
 def cmdline(command):
     process = Popen(
@@ -21,21 +21,23 @@ def gitCommandHandler(command):
     params = command.split(' ')[1:]
     if params[0] == 'update':
         path = os.path.dirname(os.path.realpath(__file__))
-        os.system('cd %s; git pull;' % path)
+        os.system('cd %s; git pull; sudo reboot;' % path)
         return True
     return False
 
 
 def torrentCommandHandler(command):
     params = command.split(' ')[1:]
-    if params[0] == 'add':
-        os.system('deluge console "add {} -p = {}; exit"'.format(params[1], DOWNLOADS_PATH))
+    if params[0] == 'start':
+        os.system('deluged')
         return True
+    elif params[0] == 'add':
+        return cmdline('deluge console "add {}; exit"'.format(params[1]))
     elif params[0] == 'show':
         files = [f for f in os.listdir(DOWNLOADS_PATH) if os.path.isfile(os.path.join(DOWNLOADS_PATH, f))]
         return files
     elif params[0] == 'current':
-        return cmdline('deluge-console "info -v; exit;"')
+        return cmdline('deluge-console "info; exit;"')
     return False
 
 
