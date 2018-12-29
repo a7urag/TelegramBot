@@ -7,7 +7,7 @@ import telepot
 import datetime
 from subprocess import PIPE, Popen
 
-DOWNLOADS_PATH = '/Downloads'
+DOWNLOADS_PATH = '~/Downloads'
 
 def cmdline(command):
     process = Popen(
@@ -75,4 +75,5 @@ while 1:
         exit()
     except:
         print('Other error or exception occured!')
+        exit()
 
