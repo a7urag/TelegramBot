@@ -55,10 +55,14 @@ def handle(msg):
         bot.sendMessage(chat_id, result)
     else:
         bot.sendMessage(chat_id, "Not a valid command")
-
-bot = telepot.Bot(os.getenv("TELEGRAM_TOKEN", "BAD"))
-bot.message_loop(handle)
-print('Bot initiated at ', datetime.datetime.now())
+token = os.getenv("TELEGRAM_TOKEN")
+if token:
+    bot = telepot.Bot(token)
+    bot.message_loop(handle)
+    print('Bot initiated at ', datetime.datetime.now())
+else:
+    print("Set TELEGRAM_TOKEN in env")
+    exit()
 
 while 1:
     try:
