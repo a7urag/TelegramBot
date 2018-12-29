@@ -1,36 +1,64 @@
 #coder :- Salman Faris
 
 import sys
+import os
 import time
 import telepot
-import RPi.GPIO as GPIO
+import datetime
+from subprocess import PIPE, Popen
 
-#LED
-def on(pin):
-        GPIO.output(pin,GPIO.HIGH)
-        return
-def off(pin):
-        GPIO.output(pin,GPIO.LOW)
-        return
-# to use Raspberry Pi board pin numbers
-GPIO.setmode(GPIO.BOARD)
-# set up GPIO output channel
-GPIO.setup(11, GPIO.OUT)
+DOWNLOADS_PATH = '/Downloads'
+
+def cmdline(command):
+    process = Popen(
+        args=command,
+        stdout=PIPE,
+        shell=True
+    )
+    return process.communicate()[0]
+
+def gitCommandHandler(command):
+    params = command.split(' ')[1:]
+    if params[0] == 'update':
+        path = os.path.dirname(os.path.realpath(__file__))
+        os.system('cd %s; git pull;' % path)
+        return True
+    return False
+
+
+def torrentCommandHandler(command):
+    params = command.split(' ')[1:]
+    if params[0] == 'add':
+        os.system('deluge console "add {} -p = {}; exit"'.format(params[1], DOWNLOADS_PATH))
+        return True
+    elif params[0] == 'show':
+        files = [f for f in os.listdir(DOWNLOADS_PATH) if os.path.isfile(os.path.join(DOWNLOADS_PATH, f))]
+        return files
+    elif params[0] == 'current':
+        return cmdline('deluge-console "info -v; exit;"')
+    return False
+
 
 def handle(msg):
     chat_id = msg['chat']['id']
     command = msg['text']
 
     print('Got command: %s' % command)
+    bot.sendMessage(chat_id, "Acknowledged %s" %command)
+    result = False
+    if command.startswith('/'):
+        if command.startswith('/git'):
+            result = gitCommandHandler(command)
+        elif command.startswith('/torrent'):
+            result = torrentCommandHandler(command)
+    if result:
+        bot.sendMessage(chat_id, result)
+    else:
+        bot.sendMessage(chat_id, "Not a valid command")
 
-    if command == 'on':
-       bot.sendMessage(chat_id, on(11))
-    elif command =='off':
-       bot.sendMessage(chat_id, off(11))
-
-bot = telepot.Bot('Bot Token')
+bot = telepot.Bot(os.getenv("TELEGRAM_TOKEN", "BAD"))
 bot.message_loop(handle)
-print('I am listening...')
+print('Bot initiated at ', datetime.datetime.now())
 
 while 1:
     try:
@@ -38,9 +66,7 @@ while 1:
     
     except KeyboardInterrupt:
         print('\n Program interrupted')
-        GPIO.cleanup()
         exit()
     
     except:
         print('Other error or exception occured!')
-        GPIO.cleanup()
