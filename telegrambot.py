@@ -32,12 +32,13 @@ def torrentCommandHandler(command):
         os.system('deluged')
         return True
     elif params[0] == 'add':
-        return cmdline('deluge console "add {}; exit"'.format(params[1]))
+        return cmdline('deluge-console "add {}; exit;"'.format(params[1]))
     elif params[0] == 'show':
         files = [f for f in os.listdir(DOWNLOADS_PATH) if os.path.isfile(os.path.join(DOWNLOADS_PATH, f))]
         return files
     elif params[0] == 'current':
-        return cmdline('deluge-console "info; exit;"')
+        result = cmdline('deluge-console "info; exit;"')
+	return result
     return False
 
 
