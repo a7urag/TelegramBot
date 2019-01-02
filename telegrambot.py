@@ -37,8 +37,7 @@ def torrentCommandHandler(command):
         files = [f for f in os.listdir(DOWNLOADS_PATH) if os.path.isfile(os.path.join(DOWNLOADS_PATH, f))]
         return files
     elif params[0] == 'current':
-        result = cmdline('deluge-console "info; exit;"')
-	return result
+        return cmdline('deluge-console "info; exit;"')
     return False
 
 
